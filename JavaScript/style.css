@@ -1,0 +1,15 @@
+#Ascii p {
+    font-family: Consolas,monospace;
+    white-space: nowrap;
+    text-wrap: avoid;
+}
+
+#Ascii {
+    font-family: Consolas,monospace;
+    white-space: nowrap;
+    text-wrap: avoid;
+}
+
+.jsgif {
+    display: none;
+}

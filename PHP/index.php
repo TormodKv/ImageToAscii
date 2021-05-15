@@ -2,6 +2,9 @@
 <html>
 <body>
 
+<h1>ImageToAscii - PHP</h1>
+<br>
+
 <form action="upload.php" method="post" enctype="multipart/form-data">
     Image:
     <input type="file" name="fileToUpload" id="fileToUpload">
