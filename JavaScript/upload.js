@@ -48,6 +48,7 @@ var sizeSlider = document.getElementById("widthSlider");
 var sizeNumber = document.getElementById('widthNumber');
 var speedSlider = document.getElementById("speedSlider");
 var rampSlider = document.getElementById("rampSlider");
+var scaleFont = document.getElementById("scaleFont");
 var loop = false;
 var gifSpeed = 100;
 var pause = false;
@@ -57,6 +58,7 @@ document.getElementById("rampSlider").addEventListener('input', ChangeRamp, fals
 document.getElementById("speedSlider").addEventListener('input', ChangeGifSpeed, false);
 document.getElementById("widthNumber").addEventListener('change', WidthNumberChange);
 document.getElementById("pausePlayButton").addEventListener('click', PausePlay);
+document.getElementById("scaleFont").addEventListener('change', PrepareImage);
 function AddImageChangeListener() {
     document.querySelector('input[type="file"]').addEventListener('change', PaintImage);
 }
@@ -75,12 +77,18 @@ function ChangeGifSpeed() {
     gifSpeed = Math.pow(speedSlider.max - speedSlider.value, 2) / 10;
 }
 function PrepareImage() {
-    if (!uploadedImage)
-        return;
-    sizeSlider.max = uploadedImage.width;
-    sizeNumber.value = sizeSlider.value;
-    if (!loop)
+    if (scaleFont.checked) {
+        var fontSize = (sizeSlider.max / sizeSlider.value) * 2;
+        AsciiParagraph.style.fontSize = String(fontSize) + "px";
+    }
+    else {
+        AsciiParagraph.style.fontSize = "1em";
+    }
+    if (!loop) {
+        sizeSlider.max = uploadedImage.width;
+        sizeNumber.value = sizeSlider.value;
         CreateImageDataAndDrawAscii();
+    }
 }
 function WidthNumberChange() {
     sizeSlider.value = sizeNumber.value;
@@ -96,9 +104,11 @@ function PaintImage() {
     //If the uploaded file is a gif: do its own thing
     if (this.files[0].name.split('.').pop() == "gif") {
         loop = true;
+        document.getElementById("gifOnlyAdjustments").style.display = "block";
         LoopGif();
         return;
     }
+    document.getElementById("gifOnlyAdjustments").style.display = "none";
     var imageCanvas = document.getElementById("imageCanvas");
     var imageContext = imageCanvas.getContext("2d");
     imageContext.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
@@ -166,26 +176,30 @@ function LoopGif() {
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                if (!loop) return [3 /*break*/, 5];
+                                if (!loop) return [3 /*break*/, 7];
                                 i = 0;
                                 i = 0;
                                 _a.label = 1;
                             case 1:
-                                if (!(i < rub.get_length())) return [3 /*break*/, 4];
-                                if (pause) {
-                                    i--;
-                                }
+                                if (!(i < rub.get_length())) return [3 /*break*/, 6];
+                                if (!pause) return [3 /*break*/, 3];
+                                i--;
+                                return [4 /*yield*/, sleep(50)];
+                            case 2:
+                                _a.sent();
+                                return [3 /*break*/, 5];
+                            case 3:
                                 rub.move_to(i);
                                 return [4 /*yield*/, cloneCanvas(rub.get_canvas())];
-                            case 2:
+                            case 4:
                                 canvas = _a.sent();
                                 $("#frames").append(canvas);
-                                _a.label = 3;
-                            case 3:
+                                _a.label = 5;
+                            case 5:
                                 i++;
                                 return [3 /*break*/, 1];
-                            case 4: return [3 /*break*/, 0];
-                            case 5: return [2 /*return*/];
+                            case 6: return [3 /*break*/, 0];
+                            case 7: return [2 /*return*/];
                         }
                     });
                 });
@@ -211,6 +225,8 @@ function cloneCanvas(oldCanvas) {
                     }
                     w = sizeSlider.value;
                     h = (oldHeight * (sizeSlider.value / oldWidth)) / 2.2;
+                    w = Math.max(w, 1);
+                    h = Math.max(h, 1);
                     //create a new canvas
                     cvs = cvs ? cvs : document.createElement('canvas');
                     if (cvs.width != oldWidth) {
@@ -230,6 +246,8 @@ function cloneCanvas(oldCanvas) {
                     return [4 /*yield*/, sleep(Math.max(gifSpeed - (t1 - t0)))];
                 case 1:
                     _a.sent();
+                    if (!loop)
+                        return [2 /*return*/];
                     //set dimensions
                     newCanvas.width = oldWidth;
                     newCanvas.height = oldHeight;

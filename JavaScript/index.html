@@ -17,16 +17,20 @@
 <p>Width Percentage:</p>
 <input type="range" min="2" max="100" value="50" id="widthSlider">
 <input type="number" id="widthNumber">
+FontScale:
+<input type="checkbox" id="scaleFont">
 <br>
 <p>Ramp:</p>
 <input type="range" min="0" max="68" value="0" id="rampSlider">
 <br>
-<p>Speed:</p>
-<input type="range" min="5" max="77" value="45" id="speedSlider">
-<input type="button" value="Pause/Play" id="pausePlayButton">
-<br>
+<di id="gifOnlyAdjustments" style="display: none">
+    <p>Speed:</p>
+    <input type="range" min="5" max="77" value="45" id="speedSlider">
+    <input type="button" value="Pause/Play" id="pausePlayButton">
+    <br>
+</di>
 
-<canvas id="imageCanvas" width="800" height="500"></canvas>
+<canvas id="imageCanvas" width="1100" height="500"></canvas>
 
 <p id="Ascii"></p>
 

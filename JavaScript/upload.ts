@@ -14,6 +14,7 @@ var sizeSlider : any = document.getElementById("widthSlider");
 var sizeNumber : any = document.getElementById('widthNumber');
 var speedSlider : any = document.getElementById("speedSlider");
 var rampSlider : any = document.getElementById("rampSlider");
+var scaleFont : any = document.getElementById("scaleFont");
 
 var loop : boolean = false;
 var gifSpeed : number = 100;
@@ -25,6 +26,7 @@ document.getElementById("rampSlider").addEventListener('input', ChangeRamp, fals
 document.getElementById("speedSlider").addEventListener('input', ChangeGifSpeed, false);
 document.getElementById("widthNumber").addEventListener('change', WidthNumberChange);
 document.getElementById("pausePlayButton").addEventListener('click', PausePlay);
+document.getElementById("scaleFont").addEventListener('change', PrepareImage);
 
 function AddImageChangeListener() {
     document.querySelector('input[type="file"]').addEventListener('change', PaintImage);
@@ -50,14 +52,19 @@ function ChangeGifSpeed(){
 
 function PrepareImage(){
 
-    if(!uploadedImage)
-        return;
+    if(scaleFont.checked) {
+        var fontSize : number = (sizeSlider.max / sizeSlider.value) * 2;
+        AsciiParagraph.style.fontSize = String(fontSize) + "px";
+    } else {
+        AsciiParagraph.style.fontSize = "1em";
+    }
 
-    sizeSlider.max = uploadedImage.width;
-    sizeNumber.value = sizeSlider.value;
-
-    if (!loop)
+    if (!loop){
+        sizeSlider.max = uploadedImage.width;
+        sizeNumber.value = sizeSlider.value;
         CreateImageDataAndDrawAscii();
+    }
+
 }
 
 function WidthNumberChange(){
@@ -79,9 +86,12 @@ function PaintImage(){
     //If the uploaded file is a gif: do its own thing
     if (this.files[0].name.split('.').pop() == "gif"){
         loop = true;
+        document.getElementById("gifOnlyAdjustments").style.display = "block";
         LoopGif();
         return;
     }
+
+    document.getElementById("gifOnlyAdjustments").style.display = "none";
 
     var imageCanvas : HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("imageCanvas");
 
@@ -176,6 +186,8 @@ function LoopGif() {
 
                             if(pause){
                                 i--;
+                                await sleep(50);
+                                continue;
                             }
 
                             rub.move_to(i);
@@ -207,6 +219,9 @@ async function cloneCanvas(oldCanvas) {
     var w = sizeSlider.value;
     var h = (oldHeight * (sizeSlider.value/oldWidth))/ 2.2;
 
+    w = Math.max(w,1);
+    h = Math.max(h,1);
+
     //create a new canvas
     cvs = cvs ? cvs : document.createElement('canvas');
 
@@ -232,6 +247,8 @@ async function cloneCanvas(oldCanvas) {
 
     await sleep(Math.max(gifSpeed - (t1-t0)));
 
+    if (!loop)
+        return;
 
     //set dimensions
     newCanvas.width = oldWidth;
