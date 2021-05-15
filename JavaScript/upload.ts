@@ -35,8 +35,6 @@ function ChangeRamp(){
         ramp = ramp.replace(ramp.charAt(Math.floor(Math.random()*(ramp.length-1))), "");
     }
     ramp = "$" + ramp;
-
-    console.log(ramp);
     PrepareImage();
 }
 
@@ -126,9 +124,11 @@ function CreateImageDataAndDrawAscii() {
 
 }
 
-function CreateAscii(imageDataArray : Uint8ClampedArray, imageWidth : number){
+function CreateAscii(imageDataArray : Uint8ClampedArray, imageWidth : number, writeToHTML = true){
 
-    AsciiParagraph.innerHTML = "";
+    if (writeToHTML)
+        AsciiParagraph.innerHTML = "";
+
     AsciiArt = "";
 
     for (let i = 0; i < imageDataArray.length; i+=4) {
@@ -150,30 +150,31 @@ function CreateAscii(imageDataArray : Uint8ClampedArray, imageWidth : number){
         }
     }
 
-    AsciiParagraph.innerHTML = AsciiArt;
+    if (writeToHTML){
+        AsciiParagraph.innerHTML = AsciiArt;
+    }
 }
 
 function LoopGif() {
     var img : any = document.getElementById("gifimg");
-    img.src = imageSource;
-    $(document).ready(function () {
-        $('#gifimg').each(function (idx, img_tag) {
-            // @ts-ignore
-            var rub = new SuperGif({gif: img_tag, progressbar_height: 0});
-            // @ts-ignore
-            rub.load(async function () {
-                while (loop) {
-                    var i = 0;
-                    for (i = 0; i < rub.get_length(); i++) {
-                        rub.move_to(i);
-                        var canvas = cloneCanvas(rub.get_canvas());
-                        $("#frames").append(canvas);
-                        await sleep(gifSpeed);
+        img.src = imageSource;
+        $(document).ready(function () {
+            $('#gifimg').each(function (idx, img_tag) {
+                // @ts-ignore
+                var rub = new SuperGif({gif: img_tag, progressbar_height: 0});
+                // @ts-ignore
+                rub.load(async function () {
+                    while (loop) {
+                        var i = 0;
+                        for (i = 0; i < rub.get_length(); i++) {
+                            rub.move_to(i);
+                            var canvas = await cloneCanvas(rub.get_canvas());
+                            $("#frames").append(canvas);
+                        }
                     }
-                }
+                });
             });
         });
-    });
 }
 
 function sleep(ms) {
@@ -181,7 +182,9 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function cloneCanvas(oldCanvas) {
+async function cloneCanvas(oldCanvas) {
+
+    var t0 : number = performance.now();
 
     var oldWidth = oldCanvas.width;
     var oldHeight = oldCanvas.height;
@@ -195,12 +198,6 @@ function cloneCanvas(oldCanvas) {
 
     //create a new canvas
     cvs = cvs ? cvs : document.createElement('canvas');
-    var newCanvas : any = document.getElementById('imageCanvas');
-    var context = newCanvas.getContext('2d');
-
-    //set dimensions
-    newCanvas.width = oldWidth;
-    newCanvas.height = oldHeight;
 
     if (cvs.width != oldWidth){
         ctx = null;
@@ -214,8 +211,22 @@ function cloneCanvas(oldCanvas) {
 
     ctx.drawImage(oldCanvas,0,0,w,h);
     var imageData : Uint8ClampedArray = ctx.getImageData(0,0, w, h).data;
-    CreateAscii(imageData, w);
+    CreateAscii(imageData, w, false);
 
+    var newCanvas : any = document.getElementById('imageCanvas');
+    var context = newCanvas.getContext('2d');
+
+    var t1 : number = performance.now();
+
+
+    await sleep(Math.max(gifSpeed - (t1-t0)));
+
+
+    //set dimensions
+    newCanvas.width = oldWidth;
+    newCanvas.height = oldHeight;
+
+    AsciiParagraph.innerHTML = AsciiArt;
     //apply the old canvas to the new one
     context.drawImage(oldCanvas, 0, 0);
 

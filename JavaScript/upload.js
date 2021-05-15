@@ -64,7 +64,6 @@ function ChangeRamp() {
         ramp = ramp.replace(ramp.charAt(Math.floor(Math.random() * (ramp.length - 1))), "");
     }
     ramp = "$" + ramp;
-    console.log(ramp);
     PrepareImage();
 }
 function ChangeGifSpeed() {
@@ -126,8 +125,10 @@ function CreateImageDataAndDrawAscii() {
         CreateAscii(imageData, w);
     };
 }
-function CreateAscii(imageDataArray, imageWidth) {
-    AsciiParagraph.innerHTML = "";
+function CreateAscii(imageDataArray, imageWidth, writeToHTML) {
+    if (writeToHTML === void 0) { writeToHTML = true; }
+    if (writeToHTML)
+        AsciiParagraph.innerHTML = "";
     AsciiArt = "";
     for (var i = 0; i < imageDataArray.length; i += 4) {
         var red = imageDataArray[i];
@@ -142,7 +143,9 @@ function CreateAscii(imageDataArray, imageWidth) {
             AsciiArt += '<br/>';
         }
     }
-    AsciiParagraph.innerHTML = AsciiArt;
+    if (writeToHTML) {
+        AsciiParagraph.innerHTML = AsciiArt;
+    }
 }
 function LoopGif() {
     var img = document.getElementById("gifimg");
@@ -165,11 +168,10 @@ function LoopGif() {
                             case 1:
                                 if (!(i < rub.get_length())) return [3 /*break*/, 4];
                                 rub.move_to(i);
-                                canvas = cloneCanvas(rub.get_canvas());
-                                $("#frames").append(canvas);
-                                return [4 /*yield*/, sleep(gifSpeed)];
+                                return [4 /*yield*/, cloneCanvas(rub.get_canvas())];
                             case 2:
-                                _a.sent();
+                                canvas = _a.sent();
+                                $("#frames").append(canvas);
                                 _a.label = 3;
                             case 3:
                                 i++;
@@ -188,33 +190,47 @@ function sleep(ms) {
     return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
 function cloneCanvas(oldCanvas) {
-    var oldWidth = oldCanvas.width;
-    var oldHeight = oldCanvas.height;
-    if (sizeSlider.max != oldWidth) {
-        sizeSlider.max = oldWidth;
-    }
-    var w = sizeSlider.value;
-    var h = (oldHeight * (sizeSlider.value / oldWidth)) / 2.2;
-    //create a new canvas
-    cvs = cvs ? cvs : document.createElement('canvas');
-    var newCanvas = document.getElementById('imageCanvas');
-    var context = newCanvas.getContext('2d');
-    //set dimensions
-    newCanvas.width = oldWidth;
-    newCanvas.height = oldHeight;
-    if (cvs.width != oldWidth) {
-        ctx = null;
-        cvs.width = oldWidth;
-        cvs.height = oldHeight / 2.2;
-    }
-    if (!ctx) {
-        ctx = cvs.getContext("2d");
-    }
-    ctx.drawImage(oldCanvas, 0, 0, w, h);
-    var imageData = ctx.getImageData(0, 0, w, h).data;
-    CreateAscii(imageData, w);
-    //apply the old canvas to the new one
-    context.drawImage(oldCanvas, 0, 0);
-    //return the new canvas
-    return newCanvas;
+    return __awaiter(this, void 0, void 0, function () {
+        var t0, oldWidth, oldHeight, w, h, imageData, newCanvas, context, t1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    t0 = performance.now();
+                    oldWidth = oldCanvas.width;
+                    oldHeight = oldCanvas.height;
+                    if (sizeSlider.max != oldWidth) {
+                        sizeSlider.max = oldWidth;
+                    }
+                    w = sizeSlider.value;
+                    h = (oldHeight * (sizeSlider.value / oldWidth)) / 2.2;
+                    //create a new canvas
+                    cvs = cvs ? cvs : document.createElement('canvas');
+                    if (cvs.width != oldWidth) {
+                        ctx = null;
+                        cvs.width = oldWidth;
+                        cvs.height = oldHeight / 2.2;
+                    }
+                    if (!ctx) {
+                        ctx = cvs.getContext("2d");
+                    }
+                    ctx.drawImage(oldCanvas, 0, 0, w, h);
+                    imageData = ctx.getImageData(0, 0, w, h).data;
+                    CreateAscii(imageData, w, false);
+                    newCanvas = document.getElementById('imageCanvas');
+                    context = newCanvas.getContext('2d');
+                    t1 = performance.now();
+                    return [4 /*yield*/, sleep(Math.max(gifSpeed - (t1 - t0)))];
+                case 1:
+                    _a.sent();
+                    //set dimensions
+                    newCanvas.width = oldWidth;
+                    newCanvas.height = oldHeight;
+                    AsciiParagraph.innerHTML = AsciiArt;
+                    //apply the old canvas to the new one
+                    context.drawImage(oldCanvas, 0, 0);
+                    //return the new canvas
+                    return [2 /*return*/, newCanvas];
+            }
+        });
+    });
 }
