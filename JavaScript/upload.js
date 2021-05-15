@@ -50,13 +50,18 @@ var speedSlider = document.getElementById("speedSlider");
 var rampSlider = document.getElementById("rampSlider");
 var loop = false;
 var gifSpeed = 100;
+var pause = false;
 window.addEventListener('load', AddImageChangeListener);
 document.getElementById("widthSlider").addEventListener('input', PrepareImage, false);
 document.getElementById("rampSlider").addEventListener('input', ChangeRamp, false);
 document.getElementById("speedSlider").addEventListener('input', ChangeGifSpeed, false);
 document.getElementById("widthNumber").addEventListener('change', WidthNumberChange);
+document.getElementById("pausePlayButton").addEventListener('click', PausePlay);
 function AddImageChangeListener() {
     document.querySelector('input[type="file"]').addEventListener('change', PaintImage);
+}
+function PausePlay() {
+    pause = !pause;
 }
 function ChangeRamp() {
     ramp = originalRamp;
@@ -167,6 +172,9 @@ function LoopGif() {
                                 _a.label = 1;
                             case 1:
                                 if (!(i < rub.get_length())) return [3 /*break*/, 4];
+                                if (pause) {
+                                    i--;
+                                }
                                 rub.move_to(i);
                                 return [4 /*yield*/, cloneCanvas(rub.get_canvas())];
                             case 2:

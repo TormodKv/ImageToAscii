@@ -17,15 +17,21 @@ var rampSlider : any = document.getElementById("rampSlider");
 
 var loop : boolean = false;
 var gifSpeed : number = 100;
+var pause = false;
 
 window.addEventListener('load', AddImageChangeListener);
 document.getElementById("widthSlider").addEventListener('input', PrepareImage, false);
 document.getElementById("rampSlider").addEventListener('input', ChangeRamp, false);
 document.getElementById("speedSlider").addEventListener('input', ChangeGifSpeed, false);
 document.getElementById("widthNumber").addEventListener('change', WidthNumberChange);
+document.getElementById("pausePlayButton").addEventListener('click', PausePlay);
 
 function AddImageChangeListener() {
     document.querySelector('input[type="file"]').addEventListener('change', PaintImage);
+}
+
+function PausePlay(){
+    pause = !pause;
 }
 
 function ChangeRamp(){
@@ -167,6 +173,11 @@ function LoopGif() {
                     while (loop) {
                         var i = 0;
                         for (i = 0; i < rub.get_length(); i++) {
+
+                            if(pause){
+                                i--;
+                            }
+
                             rub.move_to(i);
                             var canvas = await cloneCanvas(rub.get_canvas());
                             $("#frames").append(canvas);
